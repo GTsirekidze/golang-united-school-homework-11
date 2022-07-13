@@ -1,6 +1,7 @@
 package batch
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -23,22 +24,28 @@ func getBatch(n int64, pool int64) (res []user) {
 		wg.Add(1)
 		go getNUser(n, pool, i, c, &wg)
 	}
-	wg.Wait()
 	//fmt.Println("after wait")
+	wg.Wait()
+
+	//fmt.Println("after close")
+	wg.Add(1)
+	go consume(c, &res, &wg)
+	wg.Wait()
 
 	close(c)
-	//fmt.Println("after close")
+	fmt.Println("HERE ends", res)
+	return res
+}
 
-	for i := range c {
-		//fmt.Println("HERE or not", i)
-		//fmt.Println("HERE o", i)
-		res = append(
-			res, i)
+func consume(ch chan user, res *[]user, wg *sync.WaitGroup) {
+
+	for i := range ch {
+		fmt.Println("HERE o", i)
+		*res = append(*res, i)
+		fmt.Println("HERE or not", res)
 		//fmt.Println("HERE or not end", res)
 	}
-
-	//fmt.Println("HERE negga", res)
-	return res
+	wg.Done()
 }
 
 func getNUser(n int64, pool int64, routineIndex int64, userChan chan user, wg *sync.WaitGroup) {
