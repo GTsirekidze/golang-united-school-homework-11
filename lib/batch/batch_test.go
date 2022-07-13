@@ -36,6 +36,7 @@ func Test_getButch(t *testing.T) {
 }
 
 func createRes(v int64) []user {
+
 	res := make([]user, 0, v)
 	for i := 0; i < int(v); i++ {
 		res = append(res, user{ID: int64(i)})
